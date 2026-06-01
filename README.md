@@ -13,7 +13,7 @@ Para empezar a jugar, sigue estos pasos:
 
 - Haz un Clone de TU repositorio (el fork que acabas de crear, no el original del Sensei).
 
-    git clone <URL_DE_TU_FORK>
+    git clone <https://github.com/casimarasn/Git_Ctf_42>
 
 - Entra en la carpeta del repositorio:
 
@@ -70,6 +70,15 @@ Guardado Temporal
 git stash: Guarda temporalmente tus archivos modificados a medias (aquellos de los que aún no has hecho commit) en un "cajón" secreto. Deja tu entorno de trabajo completamente limpio para que puedas cambiar de rama sin perder datos.
 
 git stash pop: Saca los archivos a medias de ese cajón y los vuelve a escupir en tu área de trabajo actual para que sigas por donde ibas.
+
+Migración de Repositorios (Modo Espejo)
+git clone --mirror <url_origen>: Descarga una copia de seguridad absoluta de un repositorio. Se trae todas las ramas (incluso las ocultas), el historial completo y las etiquetas de versión.
+git push --mirror <url_destino>: Empuja absolutamente todo ese contenido clonado a un nuevo repositorio destino (ideal para migrar proyectos enteros a otro servidor sin perder datos).
+
+🚨 Botón de Pánico (Deshacer errores)
+git revert <hash_del_commit>: Crea un nuevo commit que hace exactamente lo contrario al commit indicado. Es la forma segura de deshacer errores compartidos en la nube sin borrar el historial.
+git reset --hard <hash_del_commit>: Viaja en el tiempo a un commit anterior, borrando y destruyendo todo lo que haya por delante.
+git push -f: Fuerza la subida de tu historial local al repositorio remoto. ¡Cuidado! Úsalo solo en tu propia rama para arreglar un error tras un reset, NUNCA en la rama main compartida con tus compañeros.
 
 Herramientas de Inspección
 

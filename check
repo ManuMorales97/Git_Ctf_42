@@ -32,7 +32,7 @@ check_lvl1() {
     echo -e "${GREEN}========================================${NC}"
     echo -e "Bandera: ${YELLOW}FLAG{m4st3r_0f_br4nch3s}${NC}\n"
     
-    echo -e "Misión completada. Ejecuta ${BLUE}./git-gud${NC} para solicitar tu próxima misión."
+    echo -e "Misión completada. Vuelve al menú o ejecuta ${BLUE}make run${NC} para solicitar tu próxima misión."
     echo "2_READY" > "$STATE_FILE"
 }
 
@@ -57,7 +57,7 @@ check_lvl2() {
     echo -e "${GREEN}========================================${NC}"
     echo -e "Bandera: ${YELLOW}FLAG{c0nfl1ct_k1ll3r_9000}${NC}\n"
     
-    echo -e "Misión completada. Ejecuta ${BLUE}./git-gud${NC} para tu misión final."
+    echo -e "Misión completada. Vuelve al menú o ejecuta ${BLUE}make run${NC} para tu próxima misión."
     echo "3_READY" > "$STATE_FILE"
 }
 
@@ -74,31 +74,67 @@ check_lvl3() {
     fi
     
     echo -e "\n${GREEN}========================================${NC}"
-    echo -e "${GREEN}¡NIVEL 3 SUPERADO! ¡CTF COMPLETADO!${NC}"
+    echo -e "${GREEN}¡NIVEL 3 SUPERADO!${NC}"
     echo -e "${GREEN}========================================${NC}"
-    echo -e "Bandera final: ${YELLOW}FLAG{g1t_m4st3r_unl0ck3d}${NC}\n"
-    echo -e "¡Enhorabuena! Ya estás listo para enfrentarte a push_swap en equipo.\n"
+    echo -e "Bandera: ${YELLOW}FLAG{st4sh_s4v10r}${NC}\n"
+    
+    echo -e "Misión completada. Vuelve al menú o ejecuta ${BLUE}make run${NC} para tu misión final."
+    echo "4_READY" > "$STATE_FILE"
+}
+
+check_lvl4() {
+    echo -e "${YELLOW}Evaluando Nivel 4...${NC}"
+    sleep 1
+    
+    # Comprobar si el nuevo servidor tiene la rama feature-secreta y el tag v1.0
+    if [ ! -d ".lvl4_sim/new_server.git" ]; then
+        echo -e "${RED}[KO]${NC} No se encuentra el nuevo servidor local. ¿Has borrado la carpeta .lvl4_sim?"
+        exit 1
+    fi
+
+    # Comprobamos el interior del nuevo servidor leyendo sus referencias directamente
+    if ! git --git-dir=.lvl4_sim/new_server.git show-ref --verify --quiet refs/heads/feature-secreta; then
+        echo -e "${RED}[KO]${NC} La rama oculta 'feature-secreta' no llegó al nuevo servidor. ¿Usaste push --mirror?"
+        exit 1
+    fi
+
+    if ! git --git-dir=.lvl4_sim/new_server.git show-ref --verify --quiet refs/tags/v1.0; then
+        echo -e "${RED}[KO]${NC} La etiqueta 'v1.0' no llegó al nuevo servidor."
+        exit 1
+    fi
+    
+    echo -e "\n${GREEN}========================================${NC}"
+    echo -e "${GREEN}¡NIVEL 4 SUPERADO! ¡CTF COMPLETADO!${NC}"
+    echo -e "${GREEN}========================================${NC}"
+    echo -e "Bandera final: ${YELLOW}FLAG{m1rr0r_m4st3r_42}${NC}\n"
+    echo -e "¡Enhorabuena! Has migrado el servidor completo. Ya estás listo para sobrevivir a push_swap.\n"
     echo "COMPLETED" > "$STATE_FILE"
 }
 
 case $STATE in
     "0_START") 
-        echo -e "${RED}Aún no has empezado. Ejecuta ./git-gud primero.${NC}" 
+        echo -e "${RED}Aún no has empezado. Ejecuta 'make run' primero.${NC}" 
         ;;
     "1_PENDING") 
         check_lvl1 
         ;;
     "2_READY") 
-        echo -e "${YELLOW}Ya has superado el nivel 1. Ejecuta ./git-gud para que te prepare la siguiente misión.${NC}" 
+        echo -e "${YELLOW}Ya has superado el nivel 1. Vuelve al menú o ejecuta 'make run' para que te prepare la siguiente misión.${NC}" 
         ;;
     "2_PENDING") 
         check_lvl2 
         ;;
     "3_READY") 
-        echo -e "${YELLOW}Ya has superado el nivel 2. Ejecuta ./git-gud para que te prepare la siguiente misión.${NC}" 
+        echo -e "${YELLOW}Ya has superado el nivel 2. Vuelve al menú o ejecuta 'make run' para que te prepare la siguiente misión.${NC}" 
         ;;
     "3_PENDING") 
         check_lvl3 
+        ;;
+    "4_READY") 
+        echo -e "${YELLOW}Ya has superado el nivel 3. Vuelve al menú o ejecuta 'make run' para que te prepare la misión final.${NC}" 
+        ;;
+    "4_PENDING") 
+        check_lvl4 
         ;;
     "COMPLETED") 
         echo -e "${GREEN}¡Ya has completado todo el CTF! No hay nada más que evaluar.${NC}" 
