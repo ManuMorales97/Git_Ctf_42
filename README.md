@@ -37,5 +37,44 @@ Para ver el mapa de tus ramas (Git Graph):
 
 make status
 
+📖 Guía de Comandos (Cheatsheet)
+
+Aquí tienes un resumen de tu arsenal. Para superar los retos de este CTF tendrás que deducir qué herramienta usar en cada momento. ¡Piensa antes de teclear!
+
+Gestión de Ramas
+
+git branch: Muestra la lista de ramas en tu repositorio local.
+
+git branch <nombre>: Crea una nueva rama, pero sin moverte a ella.
+
+git checkout -b <nombre> (o git switch -c <nombre>): Crea una rama nueva y te mueve a ella de inmediato.
+
+git checkout <nombre> (o git switch <nombre>): Viaja a una rama ya existente.
+
+Fusión y Conflictos
+
+git merge <rama>: Coge el historial de la <rama> indicada y lo intenta fusionar en la rama en la que estás situado actualmente.
+
+Resolución manual de conflictos: Si Git te avisa de un conflicto durante un merge, el proceso automático se pausa.
+
+Abre el archivo afectado en tu editor (Vim, VSCode...).
+
+Localiza y borra las marcas de conflicto de Git (<<<<<<< HEAD, =======, >>>>>>>).
+
+Deja el código tal y como debería quedar en su versión final y guarda el archivo.
+
+Ejecuta git add <archivo> y git commit para sellar la fusión.
+
+Guardado Temporal
+
+git stash: Guarda temporalmente tus archivos modificados a medias (aquellos de los que aún no has hecho commit) en un "cajón" secreto. Deja tu entorno de trabajo completamente limpio para que puedas cambiar de rama sin perder datos.
+
+git stash pop: Saca los archivos a medias de ese cajón y los vuelve a escupir en tu área de trabajo actual para que sigas por donde ibas.
+
+Herramientas de Inspección
+
+git status: Tu mejor amigo. Te chiva exactamente en qué rama estás, qué archivos están modificados y si hay algún conflicto pendiente. Úsalo constantemente.
+
+git log --graph --oneline --all: Muestra un mapa visual del árbol de ramas y commits (recuerda que tienes el atajo make status para no tener que escribir todo esto).
 
 ¡Suerte, Git Gud, y que la Norminette os acompañe!
