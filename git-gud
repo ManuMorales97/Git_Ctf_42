@@ -9,79 +9,115 @@ NC='\033[0m'
 
 STATE_FILE=".ctf_state"
 
-if [ ! -f "$STATE_FILE" ]; then
-    STATE="0_START"
-else
-    STATE=$(cat "$STATE_FILE")
-fi
+# ==========================================
+# FUNCIONES DE LIMPIEZA Y REINICIO
+# ==========================================
+
+reset_to_base() {
+	# Limpia el repositorio por completo devolviéndolo a su estado original
+	rm -f "$STATE_FILE"
+	rm -rf .lvl4_sim 2>/dev/null
+	git checkout main 2>/dev/null || true
+	git reset --hard origin/main 2>/dev/null || true
+	git clean -fd 2>/dev/null
+	git branch -D fix-norminette 2>/dev/null || true
+	git branch -D compañero-rama 2>/dev/null || true
+	git stash clear 2>/dev/null
+}
+
+restart_current_level() {
+	echo -e "\n${YELLOW}🔄 Purificando el repositorio y reiniciando el nivel actual...${NC}"
+	case $STATE in
+		"0_START"|"1_PENDING")
+			reset_to_base
+			STATE="0_START"
+			;;
+		"2_READY"|"2_PENDING")
+			reset_to_base
+			STATE="2_READY"
+			echo "$STATE" > "$STATE_FILE"
+			;;
+		"3_READY"|"3_PENDING")
+			reset_to_base
+			STATE="3_READY"
+			echo "$STATE" > "$STATE_FILE"
+			;;
+		"4_READY"|"4_PENDING"|"COMPLETED")
+			reset_to_base
+			STATE="4_READY"
+			echo "$STATE" > "$STATE_FILE"
+			;;
+	esac
+	sleep 1
+}
 
 # ==========================================
 # FUNCIONES PARA MOSTRAR INSTRUCCIONES
 # ==========================================
 
 show_lvl1() {
-    clear
-    echo -e "${BLUE}====================================================${NC}"
-    echo -e "${YELLOW}               <GIT/> CTF - 42 MÁLAGA                ${NC}"
-    echo -e "${BLUE}====================================================\n${NC}"
-    echo -e "¡Bienvenido! Has clonado el repositorio con éxito.\n"
-    
-    echo -e "${YELLOW}>> NIVEL 1: UNIVERSOS PARALELOS <<${NC}\n"
-    echo -e "Misión:"
-    echo -e "1. Crea una rama llamada ${GREEN}fix-norminette${NC} y sitúate en ella."
-    echo -e "2. Añade un comentario al final de ${GREEN}utils.c${NC} que diga: ${YELLOW}// fix norm${NC}"
-    echo -e "3. Registra este cambio en el historial de tu nueva rama."
-    echo -e "4. NO fusiones (merge) la rama todavía.\n"
-    
-    echo -e "Cuando creas que lo tienes, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
+	clear
+	echo -e "${BLUE}====================================================${NC}"
+	echo -e "${YELLOW}               <GIT/> CTF - 42 MÁLAGA                ${NC}"
+	echo -e "${BLUE}====================================================\n${NC}"
+	echo -e "¡Bienvenido! Has clonado el repositorio con éxito.\n"
+	
+	echo -e "${YELLOW}>> NIVEL 1: UNIVERSOS PARALELOS <<${NC}\n"
+	echo -e "Misión:"
+	echo -e "1. Crea una rama llamada ${GREEN}fix-norminette${NC} y sitúate en ella."
+	echo -e "2. Añade un comentario al final de ${GREEN}utils.c${NC} que diga: ${YELLOW}// fix norm${NC}"
+	echo -e "3. Registra este cambio en el historial de tu nueva rama."
+	echo -e "4. NO fusiones (merge) la rama todavía.\n"
+	
+	echo -e "Cuando creas que lo tienes, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
 }
 
 show_lvl2() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 2: EL CHOQUE DE TRENES (MERGE CONFLICT) <<${NC}\n"
-    echo -e "Misión:"
-    echo -e "1. Tu 'compañero' ha dejado cambios en la rama ${GREEN}compañero-rama${NC}."
-    echo -e "2. Tú tienes cambios distintos en la misma línea en tu rama (${GREEN}main${NC})."
-    echo -e "3. Intenta fusionar la rama de tu compañero en la tuya."
-    echo -e "4. ¡Conflicto! Ábrelo en tu editor, resuélvelo manualmente y completa la fusión.\n"
-    
-    echo -e "Cuando resuelvas el conflicto, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
+	clear
+	echo -e "${YELLOW}>> NIVEL 2: EL CHOQUE DE TRENES (MERGE CONFLICT) <<${NC}\n"
+	echo -e "Misión:"
+	echo -e "1. Tu 'compañero' ha dejado cambios en la rama ${GREEN}compañero-rama${NC}."
+	echo -e "2. Tú tienes cambios distintos en la misma línea en tu rama (${GREEN}main${NC})."
+	echo -e "3. Intenta fusionar la rama de tu compañero en la tuya."
+	echo -e "4. ¡Conflicto! Ábrelo en tu editor, resuélvelo manualmente y completa la fusión.\n"
+	
+	echo -e "Cuando resuelvas el conflicto, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
 }
 
 show_lvl3() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
-    echo -e "Situación:"
-    echo -e "Estás a medias modificando el archivo ${GREEN}push_swap.c${NC}."
-    echo -e "¡De repente avisan de un bug URGENTE en ${GREEN}utils.c${NC} que hay que arreglar!\n"
-    
-    echo -e "Misión:"
-    echo -e "1. Guarda tu trabajo de push_swap.c sin hacer commit (escóndelo en el 'cajón' temporal)."
-    echo -e "2. Añade al final de ${GREEN}utils.c${NC} lo siguiente: ${YELLOW}// Hotfix urgente aplicado${NC}"
-    echo -e "3. Registra ese hotfix con un commit."
-    echo -e "4. Saca tu trabajo de push_swap.c del cajón temporal para seguir por donde ibas.\n"
-    
-    echo -e "Cuando lo tengas, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
+	clear
+	echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
+	echo -e "Situación:"
+	echo -e "Estás a medias modificando el archivo ${GREEN}push_swap.c${NC}."
+	echo -e "¡De repente avisan de un bug URGENTE en ${GREEN}utils.c${NC} que hay que arreglar!\n"
+	
+	echo -e "Misión:"
+	echo -e "1. Guarda tu trabajo de push_swap.c sin hacer commit (escóndelo en el 'cajón' temporal)."
+	echo -e "2. Añade al final de ${GREEN}utils.c${NC} lo siguiente: ${YELLOW}// Hotfix urgente aplicado${NC}"
+	echo -e "3. Registra ese hotfix con un commit."
+	echo -e "4. Saca tu trabajo de push_swap.c del cajón temporal para seguir por donde ibas.\n"
+	
+	echo -e "Cuando lo tengas, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
 }
 
 show_lvl4() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 4: LA GRAN MIGRACIÓN (--mirror) <<${NC}\n"
-    echo -e "Situación:"
-    echo -e "¡Alerta roja! El servidor principal que aloja nuestro proyecto antiguo ('old_server') se está corrompiendo."
-    echo -e "Tenemos un servidor nuevo y vacío, pero necesitamos migrar el proyecto EXACTAMENTE como está."
-    echo -e "Un 'clone' normal no nos sirve, porque perderíamos las ramas ocultas y las etiquetas de versión.\n"
-    
-    echo -e "Misión:"
-    echo -e "1. Haz un clon espejo (copia de seguridad absoluta) del servidor antiguo:"
-    echo -e "   ${GREEN}git clone --mirror .lvl4_sim/old_server${NC}"
-    echo -e "2. Entra en la carpeta especial que se acaba de crear:"
-    echo -e "   ${GREEN}cd old_server.git${NC}"
-    echo -e "3. Empuja absolutamente todo (ramas y etiquetas) al nuevo servidor:"
-    echo -e "   ${GREEN}git push --mirror ../.lvl4_sim/new_server.git${NC}"
-    echo -e "4. Vuelve a la carpeta principal del juego (${GREEN}cd ..${NC}) y comprueba tu nivel.\n"
-    
-    echo -e "Cuando lo tengas, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
+	clear
+	echo -e "${YELLOW}>> NIVEL 4: LA GRAN MIGRACIÓN (--mirror) <<${NC}\n"
+	echo -e "Situación:"
+	echo -e "¡Alerta roja! El servidor principal que aloja nuestro proyecto antiguo ('old_server') se está corrompiendo."
+	echo -e "Tenemos un servidor nuevo y vacío, pero necesitamos migrar el proyecto EXACTAMENTE como está."
+	echo -e "Un 'clone' normal no nos sirve, porque perderíamos las ramas ocultas y las etiquetas de versión.\n"
+	
+	echo -e "Misión:"
+	echo -e "1. Haz un clon espejo (copia de seguridad absoluta) del servidor antiguo:"
+	echo -e "   ${GREEN}git clone --mirror .lvl4_sim/old_server${NC}"
+	echo -e "2. Entra en la carpeta especial que se acaba de crear:"
+	echo -e "   ${GREEN}cd old_server.git${NC}"
+	echo -e "3. Empuja absolutamente todo (ramas y etiquetas) al nuevo servidor:"
+	echo -e "   ${GREEN}git push --mirror ../.lvl4_sim/new_server.git${NC}"
+	echo -e "4. Vuelve a la carpeta principal del juego (${GREEN}cd ..${NC}) y comprueba tu nivel.\n"
+	
+	echo -e "Cuando lo tengas, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
 }
 
 # ==========================================
@@ -89,177 +125,224 @@ show_lvl4() {
 # ==========================================
 
 setup_lvl1() {
-    STATE="1_PENDING"
-    echo "$STATE" > "$STATE_FILE"
+	STATE="1_PENDING"
+	echo "$STATE" > "$STATE_FILE"
 }
 
 setup_lvl2() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 2: EL CHOQUE DE TRENES (MERGE CONFLICT) <<${NC}\n"
-    echo "El Sensei está preparando el escenario en la sombra..."
-    
-    cat <<EOF > main.c
+	clear
+	echo -e "${YELLOW}>> NIVEL 2: EL CHOQUE DE TRENES (MERGE CONFLICT) <<${NC}\n"
+	echo "El Sensei está preparando el escenario en la sombra..."
+	
+	cat <<EOF > main.c
 #include <unistd.h>
 int main(void) {
-    // TODO: iniciar variables
-    return (0);
+	// TODO: iniciar variables
+	return (0);
 }
 EOF
-    git add main.c
-    git commit -m "Añadida estructura inicial" --quiet
+	git add main.c
+	git commit -m "Añadida estructura inicial" --quiet
 
-    git branch compañero-rama
-    git checkout compañero-rama --quiet
-    cat <<EOF > main.c
+	git branch compañero-rama
+	git checkout compañero-rama --quiet
+	cat <<EOF > main.c
 #include <unistd.h>
 int main(void) {
-    // Variables inicializadas por tu compañero
-    return (0);
+	// Variables inicializadas por tu compañero
+	return (0);
 }
 EOF
-    git add main.c
-    git commit -m "Compañero inicializa variables" --quiet
+	git add main.c
+	git commit -m "Compañero inicializa variables" --quiet
 
-    git checkout main --quiet
-    cat <<EOF > main.c
+	git checkout main --quiet
+	cat <<EOF > main.c
 #include <unistd.h>
 int main(void) {
-    // Variables inicializadas por mi
-    return (0);
+	// Variables inicializadas por mi
+	return (0);
 }
 EOF
-    git add main.c
-    git commit -m "Sensei inicializa variables" --quiet
+	git add main.c
+	git commit -m "Sensei inicializa variables" --quiet
 
-    echo -e "${GREEN}¡Escenario preparado!${NC}\n"
-    STATE="2_PENDING"
-    echo "$STATE" > "$STATE_FILE"
-    sleep 2
+	echo -e "${GREEN}¡Escenario preparado!${NC}\n"
+	STATE="2_PENDING"
+	echo "$STATE" > "$STATE_FILE"
+	sleep 2
 }
 
 setup_lvl3() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
-    echo "Preparando el escenario de urgencia..."
-    
-    echo -e "#include <stdio.h>\n" > push_swap.c
-    git add push_swap.c
-    git commit -m "Añadido push_swap base" --quiet
-    echo -e "int main(void) {\n" >> push_swap.c
+	clear
+	echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
+	echo "Preparando el escenario de urgencia..."
+	
+	echo -e "#include <stdio.h>\n" > push_swap.c
+	git add push_swap.c
+	git commit -m "Añadido push_swap base" --quiet
+	echo -e "int main(void) {\n" >> push_swap.c
 
-    echo -e "${GREEN}¡Escenario preparado!${NC}\n"
-    STATE="3_PENDING"
-    echo "$STATE" > "$STATE_FILE"
-    sleep 2
+	echo -e "${GREEN}¡Escenario preparado!${NC}\n"
+	STATE="3_PENDING"
+	echo "$STATE" > "$STATE_FILE"
+	sleep 2
 }
 
 setup_lvl4() {
-    clear
-    echo -e "${YELLOW}>> NIVEL 4: LA GRAN MIGRACIÓN (--mirror) <<${NC}\n"
-    echo "El Sensei está corrompiendo el servidor antiguo..."
-    
-    # Limpiamos si había algo antes
-    rm -rf .lvl4_sim 2>/dev/null
-    mkdir .lvl4_sim
-    
-    # 1. Crear el servidor antiguo (con ramas y tags para que el mirror tenga sentido)
-    mkdir .lvl4_sim/old_server
-    cd .lvl4_sim/old_server
-    git init --quiet
-    echo "Código legado muy importante" > app.c
-    git add app.c
-    git commit -m "Init legacy app" --quiet
-    git branch feature-secreta --quiet
-    git tag v1.0
-    cd ../..
-    
-    # 2. Crear el servidor nuevo (un repositorio 'bare' listo para recibir el push)
-    git init --bare --quiet .lvl4_sim/new_server.git
-    
-    echo -e "${GREEN}¡Servidores listos para la evacuación!${NC}\n"
-    STATE="4_PENDING"
-    echo "$STATE" > "$STATE_FILE"
-    sleep 2
+	clear
+	echo -e "${YELLOW}>> NIVEL 4: LA GRAN MIGRACIÓN (--mirror) <<${NC}\n"
+	echo "El Sensei está corrompiendo el servidor antiguo..."
+	
+	# Limpiamos si había algo antes
+	rm -rf .lvl4_sim 2>/dev/null
+	mkdir .lvl4_sim
+	
+	# 1. Crear el servidor antiguo
+	mkdir .lvl4_sim/old_server
+	cd .lvl4_sim/old_server
+	git init --quiet
+	echo "Código legado muy importante" > app.c
+	git add app.c
+	git commit -m "Init legacy app" --quiet
+	git branch feature-secreta --quiet
+	git tag v1.0
+	cd ../..
+	
+	# 2. Crear el servidor nuevo
+	git init --bare --quiet .lvl4_sim/new_server.git
+	
+	echo -e "${GREEN}¡Servidores listos para la evacuación!${NC}\n"
+	STATE="4_PENDING"
+	echo "$STATE" > "$STATE_FILE"
+	sleep 2
 }
-
-# ==========================================
-# GESTIÓN DEL ESTADO ACTUAL (AUTO-SETUP)
-# ==========================================
-if [ "$STATE" == "0_START" ]; then
-    setup_lvl1
-elif [ "$STATE" == "2_READY" ]; then
-    setup_lvl2
-elif [ "$STATE" == "3_READY" ]; then
-    setup_lvl3
-elif [ "$STATE" == "4_READY" ]; then
-    setup_lvl4
-fi
 
 # ==========================================
 # FLUJO DEL GAME MASTER (MENÚ INTERACTIVO)
 # ==========================================
 
 while true; do
-    clear
-    
-    # Recargar estado por si el script ./check lo modificó en otra ventana
-    STATE=$(cat "$STATE_FILE" 2>/dev/null || echo "1_PENDING")
-    
-    echo -e "${BLUE}====================================================${NC}"
-    echo -e "${YELLOW}               <GIT/> CTF - 42 MÁLAGA                ${NC}"
-    echo -e "${BLUE}====================================================${NC}\n"
-    
-    if [ "$STATE" == "COMPLETED" ]; then
-        echo -e "${GREEN}¡🏆 Has completado el CTF! Eres un maestro de Git.${NC}\n"
-    else
-        echo -e "Estado actual: ${GREEN}Nivel en curso${NC}\n"
-    fi
-    
-    echo -e "Opciones disponibles:"
-    echo -e "  1) Ver misión actual"
-    echo -e "  2) Comprobar Nivel (Ejecutar Evaluador)"
-    echo -e "  3) Ver mi historial de Git (Árbol visual)"
-    echo -e "  4) Salir"
-    echo
-    
-    read -r -p "> Elige una opción: " choice
-    
-    case "$choice" in
-        1)
-            if [[ "$STATE" == "1_PENDING" || "$STATE" == "0_START" ]]; then show_lvl1; fi
-            if [[ "$STATE" == "2_PENDING" || "$STATE" == "2_READY" ]]; then show_lvl2; fi
-            if [[ "$STATE" == "3_PENDING" || "$STATE" == "3_READY" ]]; then show_lvl3; fi
-            if [[ "$STATE" == "4_PENDING" || "$STATE" == "4_READY" ]]; then show_lvl4; fi
-            if [[ "$STATE" == "COMPLETED" ]]; then echo -e "${GREEN}¡Todas las misiones superadas!${NC}"; fi
-            ;;
-        2)
-            clear
-            if [ -f "./check" ]; then
-                ./check
-                # Al comprobar, leemos el nuevo estado
-                STATE=$(cat "$STATE_FILE")
-                if [[ "$STATE" == "2_READY" ]]; then setup_lvl2; fi
-                if [[ "$STATE" == "3_READY" ]]; then setup_lvl3; fi
-                if [[ "$STATE" == "4_READY" ]]; then setup_lvl4; fi
-            else
-                echo -e "${RED}Error: No se encuentra el archivo ./check${NC}"
-            fi
-            ;;
-        3)
-            clear
-            echo -e "${YELLOW}Historial de Git (Graph):${NC}"
-            git --no-pager log --graph --oneline --all
-            ;;
-        4)
-            clear
-            echo -e "${BLUE}¡Hasta pronto, Git Master!${NC}"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Opción no válida.${NC}"
-            ;;
-    esac
-    
-    echo
-    read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+	clear
+	
+	# Leer estado actual
+	if [ ! -f "$STATE_FILE" ]; then
+		STATE="0_START"
+	else
+		STATE=$(cat "$STATE_FILE")
+	fi
+	
+	# Auto-Setup de niveles si es necesario
+	if [ "$STATE" == "0_START" ]; then setup_lvl1; fi
+	if [ "$STATE" == "2_READY" ]; then setup_lvl2; fi
+	if [ "$STATE" == "3_READY" ]; then setup_lvl3; fi
+	if [ "$STATE" == "4_READY" ]; then setup_lvl4; fi
+	
+	# Recargar estado tras un posible setup
+	STATE=$(cat "$STATE_FILE" 2>/dev/null || echo "1_PENDING")
+	
+	echo -e "${BLUE}====================================================${NC}"
+	echo -e "${YELLOW}               <GIT/> CTF - 42 MÁLAGA                ${NC}"
+	echo -e "${BLUE}====================================================${NC}\n"
+	
+	if [ "$STATE" == "COMPLETED" ]; then
+		echo -e "${GREEN}¡🏆 Has completado el CTF! Eres un maestro de Git.${NC}\n"
+	else
+		echo -e "Estado actual: ${GREEN}Nivel en curso${NC}\n"
+	fi
+	
+	echo -e "Opciones disponibles:"
+	echo -e "  1) Ver misión actual"
+	echo -e "  2) Comprobar Nivel (Ejecutar Evaluador)"
+	echo -e "  3) Ver mi historial de Git (Árbol visual)"
+	echo -e "  4) Reiniciar el nivel actual"
+	echo -e "  5) Reiniciar TODO el CTF (Empezar desde cero)"
+	
+	if [ "$STATE" == "COMPLETED" ]; then
+		echo -e "  6) ${YELLOW}[MODO LIBRE]${NC} Repetir un nivel específico"
+		echo -e "  7) Salir"
+	else
+		echo -e "  6) Salir"
+	fi
+	echo
+	
+	read -r -p "> Elige una opción: " choice
+	
+	case "$choice" in
+		1)
+			if [[ "$STATE" == "1_PENDING" || "$STATE" == "0_START" ]]; then show_lvl1; fi
+			if [[ "$STATE" == "2_PENDING" || "$STATE" == "2_READY" ]]; then show_lvl2; fi
+			if [[ "$STATE" == "3_PENDING" || "$STATE" == "3_READY" ]]; then show_lvl3; fi
+			if [[ "$STATE" == "4_PENDING" || "$STATE" == "4_READY" ]]; then show_lvl4; fi
+			if [[ "$STATE" == "COMPLETED" ]]; then echo -e "${GREEN}¡Todas las misiones superadas!${NC}"; fi
+			;;
+		2)
+			clear
+			if [ -f "./check" ]; then
+				./check
+			else
+				echo -e "${RED}Error: No se encuentra el archivo ./check${NC}"
+			fi
+			;;
+		3)
+			clear
+			echo -e "${YELLOW}Historial de Git (Graph):${NC}"
+			git --no-pager log --graph --oneline --all
+			;;
+		4)
+			restart_current_level
+			continue
+			;;
+		5)
+			echo -e "\n${RED}⚠️  Atención: Esto borrará todo tu progreso y ramas.${NC}"
+			read -r -p "¿Estás seguro? (s/n): " confirm
+			if [[ "$confirm" == "s" || "$confirm" == "S" ]]; then
+				echo -e "\n${YELLOW}🔥 Quemando las naves y empezando de cero...${NC}"
+				reset_to_base
+				STATE="0_START"
+				sleep 1
+			fi
+			continue
+			;;
+		6)
+			if [ "$STATE" == "COMPLETED" ]; then
+				clear
+				echo -e "${YELLOW}>> MODO LIBRE: SELECCIÓN DE NIVEL <<${NC}\n"
+				echo "1) Nivel 1: Universos Paralelos"
+				echo "2) Nivel 2: Conflictos"
+				echo "3) Nivel 3: Git Stash"
+				echo "4) Nivel 4: Migración Mirror"
+				echo "5) Volver al menú"
+				echo
+				read -r -p "> ¿Qué nivel quieres repetir?: " lvl_choice
+				case "$lvl_choice" in
+					1) reset_to_base; STATE="0_START";;
+					2) reset_to_base; STATE="2_READY"; echo "$STATE" > "$STATE_FILE";;
+					3) reset_to_base; STATE="3_READY"; echo "$STATE" > "$STATE_FILE";;
+					4) reset_to_base; STATE="4_READY"; echo "$STATE" > "$STATE_FILE";;
+					5) continue;;
+					*) echo -e "${RED}Opción no válida.${NC}"; sleep 1; continue;;
+				esac
+			else
+				clear
+				echo -e "${BLUE}¡Hasta pronto, Git Master!${NC}"
+				exit 0
+			fi
+			;;
+		7)
+			if [ "$STATE" == "COMPLETED" ]; then
+				clear
+				echo -e "${BLUE}¡Hasta pronto, Git Master!${NC}"
+				exit 0
+			else
+				echo -e "${RED}Opción no válida.${NC}"
+			fi
+			;;
+		*)
+			echo -e "${RED}Opción no válida.${NC}"
+			;;
+	esac
+	
+	echo
+	read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
 done
