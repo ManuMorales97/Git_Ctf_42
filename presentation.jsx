@@ -238,7 +238,7 @@ export default function App() {
             <div className="p-6 font-mono text-lg space-y-3">
               <p className="text-green-400"><span className="text-purple-400">➜</span>  <span className="text-blue-400">~</span> ./start_ctf.sh</p>
               <p className="text-slate-300 animate-pulse">Iniciando simulador de repositorios...</p>
-              <p className="text-yellow-400 mt-4">⚠️ Misión: Supera los 3 niveles usando comandos Git.</p>
+              <p className="text-yellow-400 mt-4">⚠️ Misión: Supera los 4 niveles usando comandos Git.</p>
               <p className="text-yellow-400">🏁 Cada nivel completado te dará una Flag (bandera).</p>
               <p className="text-green-400 mt-4 font-bold">&gt; Nivel 1: Universos Paralelos [CARGADO]</p>
               <p className="text-slate-500 mt-8">Presiona INTRO para empezar...</p>
