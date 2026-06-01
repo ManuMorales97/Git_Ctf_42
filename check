@@ -68,8 +68,8 @@ check_lvl3() {
         echo -e "${RED}[KO]${NC} No se detecta tu último commit modificando 'utils.c'."
         exit 1
     fi
-    if ! git status --porcelain | grep -q " M Makefile"; then
-        echo -e "${RED}[KO]${NC} El 'Makefile' no está modificado en tu área de trabajo."
+    if ! git status --porcelain | grep -q " M push_swap.c"; then
+        echo -e "${RED}[KO]${NC} El archivo 'push_swap.c' no está modificado en tu área de trabajo. (¿olvidaste hacer stash pop?)."
         exit 1
     fi
     

@@ -52,14 +52,14 @@ show_lvl3() {
     clear
     echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
     echo -e "Situación:"
-    echo -e "Estás a medias modificando el ${GREEN}Makefile${NC}."
+    echo -e "Estás a medias modificando el archivo ${GREEN}push_swap.c${NC}."
     echo -e "¡De repente avisan de un bug URGENTE en ${GREEN}utils.c${NC} que hay que arreglar!\n"
     
     echo -e "Misión:"
-    echo -e "1. Guarda tu trabajo del Makefile sin hacer commit (escóndelo en el 'cajón' temporal)."
+    echo -e "1. Guarda tu trabajo de push_swap.c sin hacer commit (escóndelo en el 'cajón' temporal)."
     echo -e "2. Añade al final de ${GREEN}utils.c${NC} lo siguiente: ${YELLOW}// Hotfix urgente aplicado${NC}"
     echo -e "3. Registra ese hotfix con un commit."
-    echo -e "4. Saca tu trabajo del Makefile del cajón temporal para seguir por donde ibas.\n"
+    echo -e "4. Saca tu trabajo de push_swap.c del cajón temporal para seguir por donde ibas.\n"
     
     echo -e "Cuando lo tengas, vuelve aquí y usa la opción 2 (o ejecuta ${BLUE}make check${NC})."
 }
@@ -142,10 +142,10 @@ setup_lvl3() {
     echo -e "${YELLOW}>> NIVEL 3: LA URGENCIA (GIT STASH) <<${NC}\n"
     echo "Preparando el escenario de urgencia..."
     
-    echo -e "NAME = push_swap\nCC = gcc\nCFLAGS = -Wall -Wextra -Werror\n" > Makefile
-    git add Makefile
-    git commit -m "Añadido Makefile base" --quiet
-    echo -e "all: \$(NAME)\n" >> Makefile
+    echo -e "#include <stdio.h>\n" > push_swap.c
+    git add push_swap.c
+    git commit -m "Añadido push_swap base" --quiet
+    echo -e "int main(void) {\n" >> push_swap.c
 
     echo -e "${GREEN}¡Escenario preparado!${NC}\n"
     STATE="3_PENDING"
